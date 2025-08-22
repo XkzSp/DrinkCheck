@@ -1,10 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ThreeScene: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     cap: THREE.Group;
+    camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
   }>();
 
   useEffect(() => {
@@ -17,21 +23,35 @@ const ThreeScene: React.FC = () => {
     
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mountRef.current.appendChild(renderer.domElement);
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
     directionalLight.position.set(10, 10, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
+
+    // Add point lights for more dramatic lighting
+    const pointLight1 = new THREE.PointLight(0x2563eb, 0.8, 20);
+    pointLight1.position.set(-5, 5, 5);
+    scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0x7c3aed, 0.6, 15);
+    pointLight2.position.set(5, -3, 3);
+    scene.add(pointLight2);
 
     // Create cap geometry
     const capGroup = new THREE.Group();
 
     // Main cap body (cylinder)
-    const capGeometry = new THREE.CylinderGeometry(1.2, 1.3, 0.3, 32);
+    const capGeometry = new THREE.CylinderGeometry(1.5, 1.6, 0.4, 32);
     const capMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x2563eb,
       metalness: 0.7,
@@ -40,10 +60,12 @@ const ThreeScene: React.FC = () => {
       clearcoatRoughness: 0.1,
     });
     const capMesh = new THREE.Mesh(capGeometry, capMaterial);
+    capMesh.castShadow = true;
+    capMesh.receiveShadow = true;
     capGroup.add(capMesh);
 
     // Cap top
-    const topGeometry = new THREE.CylinderGeometry(1.1, 1.1, 0.05, 32);
+    const topGeometry = new THREE.CylinderGeometry(1.4, 1.4, 0.08, 32);
     const topMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x1d4ed8,
       metalness: 0.8,
@@ -51,11 +73,12 @@ const ThreeScene: React.FC = () => {
       clearcoat: 1.0,
     });
     const topMesh = new THREE.Mesh(topGeometry, topMaterial);
-    topMesh.position.y = 0.175;
+    topMesh.position.y = 0.24;
+    topMesh.castShadow = true;
     capGroup.add(topMesh);
 
     // LED ring
-    const ledGeometry = new THREE.TorusGeometry(0.9, 0.05, 8, 16);
+    const ledGeometry = new THREE.TorusGeometry(1.2, 0.08, 8, 16);
     const ledMaterial = new THREE.MeshPhysicalMaterial({ 
       color: 0x00ff00,
       emissive: 0x004400,
@@ -63,11 +86,11 @@ const ThreeScene: React.FC = () => {
       roughness: 0.3,
     });
     const ledRing = new THREE.Mesh(ledGeometry, ledMaterial);
-    ledRing.position.y = 0.1;
+    ledRing.position.y = 0.15;
     capGroup.add(ledRing);
 
     // Sensor dot
-    const sensorGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+    const sensorGeometry = new THREE.SphereGeometry(0.15, 16, 16);
     const sensorMaterial = new THREE.MeshPhysicalMaterial({
       color: 0xff0000,
       emissive: 0x440000,
@@ -75,15 +98,14 @@ const ThreeScene: React.FC = () => {
       roughness: 0.4,
     });
     const sensorMesh = new THREE.Mesh(sensorGeometry, sensorMaterial);
-    sensorMesh.position.y = 0.2;
+    sensorMesh.position.y = 0.28;
     capGroup.add(sensorMesh);
 
     scene.add(capGroup);
-    camera.position.z = 5;
-    camera.position.y = 1;
+    camera.position.set(3, 2, 6);
     camera.lookAt(0, 0, 0);
 
-    sceneRef.current = { cap: capGroup };
+    sceneRef.current = { cap: capGroup, camera, renderer };
 
     // Local animation ID for this specific useEffect run
     let animationId: number;
@@ -93,8 +115,9 @@ const ThreeScene: React.FC = () => {
       animationId = requestAnimationFrame(animate);
       
       // Smooth rotation
-      capGroup.rotation.y += 0.005;
-      capGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.1;
+      capGroup.rotation.y += 0.008;
+      capGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.15;
+      capGroup.rotation.z = Math.cos(Date.now() * 0.0008) * 0.05;
       
       // LED pulsing effect
       const pulse = Math.sin(Date.now() * 0.003) * 0.5 + 0.5;
@@ -103,6 +126,9 @@ const ThreeScene: React.FC = () => {
       // Sensor blinking
       const blink = Math.sin(Date.now() * 0.01) > 0.8 ? 1 : 0;
       sensorMaterial.emissive.setRGB(blink * 0.5, 0, 0);
+
+      // Floating animation
+      capGroup.position.y = Math.sin(Date.now() * 0.002) * 0.3;
       
       renderer.render(scene, camera);
     };
@@ -128,29 +154,103 @@ const ThreeScene: React.FC = () => {
     };
   }, []);
 
-  // Update cap position based on scroll
+  // GSAP ScrollTrigger animations for the 3D cap
   useEffect(() => {
-    const handleScroll = () => {
-      if (!sceneRef.current) return;
-      
-      const scrollY = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = Math.min(scrollY / maxScroll, 1);
-      
-      // Move and rotate cap based on scroll
-      sceneRef.current.cap.position.y = scrollProgress * 2;
-      sceneRef.current.cap.rotation.z = scrollProgress * Math.PI * 2;
-    };
+    if (!sceneRef.current) return;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const { cap, camera } = sceneRef.current;
+    
+    // Hero section - cap starts far and comes closer
+    gsap.set(cap.position, { x: 0, y: 0, z: -5 });
+    gsap.set(cap.scale, { x: 0.5, y: 0.5, z: 0.5 });
+    gsap.set(camera.position, { x: 3, y: 2, z: 8 });
+
+    // Timeline for scroll-based animations
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          
+          // Move cap across the screen as user scrolls
+          cap.position.x = Math.sin(progress * Math.PI * 2) * 2;
+          cap.position.z = -5 + progress * 8; // Comes closer as you scroll
+          
+          // Scale animation
+          const scale = 0.5 + progress * 1.5;
+          cap.scale.set(scale, scale, scale);
+          
+          // Camera movement for cinematic effect
+          camera.position.x = 3 + Math.sin(progress * Math.PI) * 2;
+          camera.position.y = 2 + Math.cos(progress * Math.PI) * 1;
+          camera.position.z = 8 - progress * 3;
+          camera.lookAt(cap.position);
+        }
+      }
+    });
+
+    // Individual section animations
+    gsap.to(cap.rotation, {
+      z: Math.PI * 2,
+      duration: 2,
+      repeat: -1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#demo",
+        start: "top 80%",
+        end: "bottom 20%",
+        scrub: 1
+      }
+    });
+
+    gsap.to(cap.position, {
+      x: -3,
+      duration: 1,
+      scrollTrigger: {
+        trigger: "#caracteristicas",
+        start: "top 80%",
+        end: "bottom 20%",
+        scrub: 1
+      }
+    });
+
+    gsap.to(cap.position, {
+      x: 3,
+      duration: 1,
+      scrollTrigger: {
+        trigger: "#como-funciona",
+        start: "top 80%",
+        end: "bottom 20%",
+        scrub: 1
+      }
+    });
+
+    gsap.to(cap.scale, {
+      x: 2.5,
+      y: 2.5,
+      z: 2.5,
+      duration: 1,
+      scrollTrigger: {
+        trigger: "#planes",
+        start: "top 80%",
+        end: "bottom 20%",
+        scrub: 1
+      }
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   return (
     <div 
       ref={mountRef} 
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ zIndex: -1 }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 0 }}
     />
   );
 };
