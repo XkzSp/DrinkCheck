@@ -50,6 +50,53 @@ const ThreeScene: React.FC = () => {
     // Create cap geometry
     const capGroup = new THREE.Group();
 
+    // Internal system components (Arduino, sensors, etc.)
+    const internalGroup = new THREE.Group();
+    
+    // Arduino board (small green rectangle)
+    const arduinoGeometry = new THREE.BoxGeometry(0.8, 0.05, 0.6);
+    const arduinoMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x00aa00,
+      metalness: 0.3,
+      roughness: 0.7,
+    });
+    const arduinoMesh = new THREE.Mesh(arduinoGeometry, arduinoMaterial);
+    arduinoMesh.position.y = -0.1;
+    internalGroup.add(arduinoMesh);
+    
+    // Wires/connections (small cylinders)
+    for (let i = 0; i < 4; i++) {
+      const wireGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
+      const wireMaterial = new THREE.MeshPhysicalMaterial({
+        color: i % 2 === 0 ? 0xff0000 : 0x000000,
+        metalness: 0.8,
+        roughness: 0.2,
+      });
+      const wireMesh = new THREE.Mesh(wireGeometry, wireMaterial);
+      wireMesh.position.set(
+        (i - 1.5) * 0.3,
+        0.05,
+        0
+      );
+      wireMesh.rotation.z = Math.PI / 2;
+      internalGroup.add(wireMesh);
+    }
+    
+    // Battery (small black box)
+    const batteryGeometry = new THREE.BoxGeometry(0.4, 0.08, 0.2);
+    const batteryMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x333333,
+      metalness: 0.1,
+      roughness: 0.8,
+    });
+    const batteryMesh = new THREE.Mesh(batteryGeometry, batteryMaterial);
+    batteryMesh.position.set(0.6, -0.08, 0.3);
+    internalGroup.add(batteryMesh);
+    
+    internalGroup.position.y = 0.1;
+    internalGroup.visible = false; // Initially hidden
+    capGroup.add(internalGroup);
+
     // Main cap body (cylinder)
     const capGeometry = new THREE.CylinderGeometry(1.5, 1.6, 0.4, 32);
     const capMaterial = new THREE.MeshPhysicalMaterial({
@@ -105,7 +152,7 @@ const ThreeScene: React.FC = () => {
     camera.position.set(3, 2, 6);
     camera.lookAt(0, 0, 0);
 
-    sceneRef.current = { cap: capGroup, camera, renderer };
+    sceneRef.current = { cap: capGroup, camera, renderer, internalSystem: internalGroup };
 
     // Local animation ID for this specific useEffect run
     let animationId: number;
@@ -114,10 +161,10 @@ const ThreeScene: React.FC = () => {
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       
-      // Smooth rotation
-      capGroup.rotation.y += 0.008;
-      capGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.15;
-      capGroup.rotation.z = Math.cos(Date.now() * 0.0008) * 0.05;
+      // Constant smooth rotation on all axes
+      capGroup.rotation.y += 0.012;
+      capGroup.rotation.x += 0.008;
+      capGroup.rotation.z += 0.005;
       
       // LED pulsing effect
       const pulse = Math.sin(Date.now() * 0.003) * 0.5 + 0.5;
@@ -158,7 +205,7 @@ const ThreeScene: React.FC = () => {
   useEffect(() => {
     if (!sceneRef.current) return;
 
-    const { cap, camera } = sceneRef.current;
+    const { cap, camera, internalSystem } = sceneRef.current;
     
     // Hero section - cap starts far and comes closer
     gsap.set(cap.position, { x: 0, y: 0, z: -5 });
@@ -228,6 +275,43 @@ const ThreeScene: React.FC = () => {
       }
     });
 
+    // Show internal system after features section
+    gsap.to(internalSystem, {
+      opacity: 1,
+      duration: 1,
+      scrollTrigger: {
+        trigger: "#como-funciona",
+        start: "top 60%",
+        end: "top 40%",
+        onEnter: () => {
+          internalSystem.visible = true;
+        },
+        onLeave: () => {
+          internalSystem.visible = false;
+        },
+        onEnterBack: () => {
+          internalSystem.visible = true;
+        },
+        onLeaveBack: () => {
+          internalSystem.visible = false;
+        }
+      }
+    });
+
+    // Special rotation animation for internal system showcase
+    gsap.to(cap.rotation, {
+      x: Math.PI * 0.3,
+      y: Math.PI * 4,
+      z: Math.PI * 0.2,
+      duration: 3,
+      ease: "power2.inOut",
+      scrollTrigger: {
+        trigger: "#como-funciona",
+        start: "top 70%",
+        end: "bottom 30%",
+        scrub: 1
+      }
+    });
     gsap.to(cap.scale, {
       x: 2.5,
       y: 2.5,

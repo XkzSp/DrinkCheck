@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CheckCircle as CircleCheck, Search, Bell, CheckCircle2 } from 'lucide-react';
+import { CheckCircle as CircleCheck, Search, Bell, CheckCircle2, Cpu, Zap, Wifi } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,6 +101,46 @@ const HowItWorks: React.FC = () => {
         </div>
 
         <div className="relative">
+          {/* Internal System Showcase */}
+          <div className="mb-20 text-center">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-1 max-w-4xl mx-auto">
+              <div className="bg-white rounded-3xl p-8">
+                <h3 className="text-3xl font-bold text-gray-900 mb-8">Sistema Interno Inteligente</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="flex flex-col items-center p-4">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <Cpu className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Arduino</h4>
+                    <p className="text-gray-600 text-center text-sm">
+                      Microcontrolador que procesa los datos de los sensores
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center p-4">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                      <Zap className="w-8 h-8 text-yellow-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Sensores</h4>
+                    <p className="text-gray-600 text-center text-sm">
+                      Detectores de movimiento de alta precisión
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center p-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                      <Wifi className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Conectividad</h4>
+                    <p className="text-gray-600 text-center text-sm">
+                      Módulo Bluetooth para smartphone
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 text-sm text-gray-500">
+                  <p>Observa el modelo 3D para ver los componentes internos</p>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Connecting line */}
           <div 
             ref={lineRef}
