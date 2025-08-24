@@ -8,25 +8,26 @@ gsap.registerPlugin(ScrollTrigger);
 const HowItWorks: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement[]>([]);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const internalSystemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate the connecting line
-      gsap.fromTo(lineRef.current,
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          duration: 2,
-          ease: "power2.out",
+      // Animate "Sistema Interno Inteligente"
+      if (internalSystemRef.current) {
+        const internalSystemElements = internalSystemRef.current.children;
+        gsap.from(internalSystemElements, {
+          opacity: 0,
+          y: 50,
+          duration: 1,
+          stagger: 0.2,
+          ease: "power3.out",
           scrollTrigger: {
-            trigger: sectionRef.current,
+            trigger: internalSystemRef.current,
             start: "top 80%",
-            end: "bottom 20%",
-            scrub: 1
-          }
-        }
-      );
+            toggleActions: "play none none reverse",
+          },
+        });
+      }
 
       // Animate steps
       stepsRef.current.forEach((step, index) => {
@@ -89,7 +90,7 @@ const HowItWorks: React.FC = () => {
   ];
 
   return (
-    <section id="como-funciona" ref={sectionRef} className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+    <section id="como-funciona" ref={sectionRef} className="py-20 bg-transparent">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -102,50 +103,41 @@ const HowItWorks: React.FC = () => {
 
         <div className="relative">
           {/* Internal System Showcase */}
-          <div className="mb-20 text-center">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-1 max-w-4xl mx-auto">
-              <div className="bg-white rounded-3xl p-8">
-                <h3 className="text-3xl font-bold text-gray-900 mb-8">Sistema Interno Inteligente</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex flex-col items-center p-4">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                      <Cpu className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Arduino</h4>
-                    <p className="text-gray-600 text-center text-sm">
-                      Microcontrolador que procesa los datos de los sensores
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center p-4">
-                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                      <Zap className="w-8 h-8 text-yellow-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Sensores</h4>
-                    <p className="text-gray-600 text-center text-sm">
-                      Detectores de movimiento de alta precisión
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center p-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                      <Wifi className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Conectividad</h4>
-                    <p className="text-gray-600 text-center text-sm">
-                      Módulo Bluetooth para smartphone
-                    </p>
-                  </div>
+          <div ref={internalSystemRef} className="mb-20 text-center">
+            <h3 className="text-3xl font-bold text-gray-900 mb-8">Sistema Interno Inteligente</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="flex flex-col items-center p-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <Cpu className="w-8 h-8 text-green-600" />
                 </div>
-                <div className="mt-6 text-sm text-gray-500">
-                  <p>Observa el modelo 3D para ver los componentes internos</p>
+                <h4 className="font-semibold text-gray-900 mb-2">Arduino</h4>
+                <p className="text-gray-600 text-center text-sm">
+                  Microcontrolador que procesa los datos de los sensores
+                </p>
+              </div>
+              <div className="flex flex-col items-center p-4">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-yellow-600" />
                 </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Sensores</h4>
+                <p className="text-gray-600 text-center text-sm">
+                  Detectores de movimiento de alta precisión
+                </p>
+              </div>
+              <div className="flex flex-col items-center p-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                  <Wifi className="w-8 h-8 text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Conectividad</h4>
+                <p className="text-gray-600 text-center text-sm">
+                  Módulo Bluetooth para smartphone
+                </p>
               </div>
             </div>
+            <div className="mt-6 text-sm text-gray-500">
+              <p>Observa el modelo 3D para ver los componentes internos</p>
+            </div>
           </div>
-          {/* Connecting line */}
-          <div 
-            ref={lineRef}
-            className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-500 transform -translate-x-1/2 hidden md:block origin-top"
-          />
 
           <div className="space-y-16">
             {steps.map((step, index) => (
