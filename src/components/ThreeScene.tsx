@@ -191,10 +191,11 @@ const ThreeScene: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
 
+    const mount = mountRef.current;
     return () => {
       cancelAnimationFrame(animationId);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (mount && renderer.domElement) {
+        mount.removeChild(renderer.domElement);
       }
       renderer.dispose();
       window.removeEventListener('resize', handleResize);
@@ -213,7 +214,7 @@ const ThreeScene: React.FC = () => {
     gsap.set(camera.position, { x: 3, y: 2, z: 8 });
 
     // Timeline for scroll-based animations
-    const tl = gsap.timeline({
+    gsap.timeline({
       scrollTrigger: {
         trigger: "body",
         start: "top top",
