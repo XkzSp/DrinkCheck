@@ -114,9 +114,11 @@ const Hero: React.FC = () => {
           </button>
         </div>
 
-        <div 
+
+      </div>
+      <div
           ref={scrollIndicatorRef}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60 cursor-pointer"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60 cursor-pointer z-20"
           onClick={scrollToDemo}
         >
           <div className="flex flex-col items-center space-y-2">
@@ -124,7 +126,6 @@ const Hero: React.FC = () => {
             <ArrowDown className="w-6 h-6" />
           </div>
         </div>
-      </div>
     </section>
   );
 };
